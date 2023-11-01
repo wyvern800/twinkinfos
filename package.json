@@ -12,13 +12,15 @@
     "crypto": "^1.0.1",
     "dotenv": "^16.3.1",
     "express": "^4.17.1",
+    "express-validator": "^7.0.1",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "pg": "^8.11.3",
     "reflect-metadata": "^0.1.13",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.0",
-    "typeorm": "^0.3.16"
+    "typeorm": "^0.3.16",
+    "wow-classic-items": "^2.0.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.15",

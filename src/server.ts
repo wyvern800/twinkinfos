@@ -28,8 +28,8 @@ app.use(cors());
 new Swagger(app, endPoints).init();
 
 // Construct all the routes
-endPoints.forEach((endPoint: Controller): void => {
-  app.use(endPoint.endpoint, endPoint.controller);
+endPoints.forEach((route: Controller): void => {
+  app.use(route.endpoint, route.controller);
 });
 
 // to initialize initial connection with the database, register all entities
