@@ -1,6 +1,8 @@
 import { Router, Response, Request } from 'express';
+import { validationResult } from 'express-validator';
 import * as repository from './items.repository';
 import DatabaseError from '../../utils/errorTypes/database';
+import * as validator from './items.validator';
 
 require('dotenv').config();
 
@@ -81,16 +83,26 @@ const routes = Router();
  *               example: "Failed to fetch data from the database."
  *               description: Error message indicating the reason for failure.
  */
-routes.get('/', async (request: Request, response: Response) => {
-  const { name } = request.query;
+routes.get(
+  '/',
+  validator.searchForItem,
+  async (request: Request, response: Response) => {
+    const { name } = request.query;
 
-  try {
-    const user = await repository.getAllItems(name);
+    const errors = validationResult(request);
 
-    return response.status(200).json(user);
-  } catch (err) {
-    throw new DatabaseError('Failed to fetch data from the database.');
-  }
-});
+    if (!errors.isEmpty()) {
+      return response.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+      const user = await repository.getAllItems(name);
+
+      return response.status(200).json(user);
+    } catch (err) {
+      throw new DatabaseError('Failed to fetch data from the database.');
+    }
+  },
+);
 
 export default routes;
