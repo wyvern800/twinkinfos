@@ -12,7 +12,7 @@ const routes = Router();
 // TODO:
 routes.get(
   '/',
-  validator.searchForItem,
+  validator.search,
   expressValidator,
   async (request: Request, response: Response) => {
     const { name } = request.query;
