@@ -11,90 +11,113 @@ const routes = Router();
 
 /**
  * @swagger
- * /auth/login:
- *   post:
- *     summary: User Login
- *     description: Endpoint for user authentication and login.
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               username:
- *                 type: string
- *                 example: john_doe
- *                 description: User's username.
- *               password:
- *                 type: string
- *                 example: password123
- *                 description: User's password.
- *     consumes:
- *       - application/json
+ * /items:
+ *   get:
+ *     summary: Gets all items from WoW
+ *     description: Endpoint to retrieve items from World of Warcraft.
+ *     tags: [Items]
  *     parameters:
- *       - in: body
- *         name: credentials
- *         description: User credentials for login.
- *         schema:
- *           type: object
- *           properties:
- *             username:
- *               type: string
- *               example: john_doe
- *             password:
- *               type: string
- *               example: password123
+ *       - in: query
+ *         name: name
+ *         description: Item name (optional)
  *     responses:
  *       200:
- *         description: Successful login. Returns an access token.
+ *         description: Successful response. Returns a list of items.
  *         schema:
- *           type: object
- *           properties:
- *             accessToken:
- *               type: string
- *               example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
- *               description: JSON Web Token (JWT) for authentication.
- *       400:
- *         description: Bad request. User not found or invalid credentials.
- *         schema:
- *           type: object
- *           properties:
- *             error:
- *               type: string
- *               example: "user not found"
- *               description: Error message indicating the reason for failure.
- *       401:
- *         description: Unauthorized. User has insufficient privileges or bad credentials.
- *         schema:
- *           type: object
- *           properties:
- *             error:
- *               type: string
- *               example: "user has no privileges"
- *               description: Error message indicating the reason for failure.
- *       500:
- *         description: Internal Server Error. Failed to fetch data from the database.
- *         schema:
- *           type: object
- *           properties:
- *             error:
- *               type: string
- *               example: "Failed to fetch data from the database."
- *               description: Error message indicating the reason for failure.
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               itemId:
+ *                 type: integer
+ *                 description: Unique identifier for the item
+ *               name:
+ *                 type: string
+ *                 description: Name of the item
+ *               icon:
+ *                 type: string
+ *                 format: uri
+ *                 description: URL to the item's icon image
+ *               class:
+ *                 type: string
+ *                 description: Item class (e.g., Weapon, Armor, etc.)
+ *               subclass:
+ *                 type: string
+ *                 description: Item subclass (e.g., Sword, Plate, etc.)
+ *               sellPrice:
+ *                 type: integer
+ *                 description: Price at which the item can be sold
+ *               quality:
+ *                 type: string
+ *                 description: Item quality (e.g., Epic, Rare, etc.)
+ *               itemLevel:
+ *                 type: integer
+ *                 description: Level of the item
+ *               requiredLevel:
+ *                 type: integer
+ *                 description: Minimum level required to use the item
+ *               slot:
+ *                 type: string
+ *                 description: Equipment slot for the item (e.g., Two-Hand, Head, etc.)
+ *               tooltip:
+ *                 type: array
+ *                 description: Array of tooltip labels describing the item
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     label:
+ *                       type: string
+ *                       description: Label describing the item property
+ *                     format:
+ *                       type: string
+ *                       description: Format for displaying the item property
+ *               itemLink:
+ *                 type: string
+ *                 description: Link to the item in the game
+ *               contentPhase:
+ *                 type: integer
+ *                 description: Phase of the game content in which the item is available
+ *               source:
+ *                 type: object
+ *                 description: Details about the source of the item
+ *                 properties:
+ *                   category:
+ *                       type: string
+ *                       description: Category of the item
+ *                   dropChance:
+ *                       type: double
+ *                       description: Drop chance
  */
 routes.get(
   '/',
-  validator.searchForItem,
+  validator.search,
   expressValidator,
   async (request: Request, response: Response) => {
-    const { name } = request.query;
+    const { name, page } = request.query;
+
+    /* const paginate = (items, perPage = 3) => {
+      const offset = perPage * (page - 1);
+      const totalPages = Math.ceil(items.length / perPage);
+      const paginatedItems = items.slice(offset, perPage * page);
+
+      return {
+        previousPage: page - 1 ? page - 1 : null,
+        nextPage: totalPages > page ? page + 1 : null,
+        total: items.length,
+        totalPages,
+        items: paginatedItems,
+      };
+    }; */
 
     try {
-      const user = await repository.getAllItems(name);
+      const items = await repository.getAllItems(name);
 
-      return response.status(200).json(user);
+      /* if (page) {
+        const paginated = paginate(user);
+        return response.status(200).json(paginated);
+      } */
+
+      return response.status(200).json(items);
     } catch (err) {
       throw new DatabaseError('Failed to fetch data from the database.');
     }
