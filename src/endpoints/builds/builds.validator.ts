@@ -1,5 +1,5 @@
 /* eslint-disable import/prefer-default-export */
-import { body } from 'express-validator';
+import { body, ValidationChain } from 'express-validator';
 import { CharacterClassName } from '../../enums/classname';
 import { Item, AlternativeItem } from '../../types/others/item';
 import { equipment } from '../../utils/constants';
@@ -30,7 +30,10 @@ const validateItem = (value: Item): boolean => {
   return true;
 };
 
-export const createBuild = [
+/**
+ * Validation chain for INSERTING builds
+ */
+export const createBuild: ValidationChain[] = [
   body('alias')
     .exists()
     .withMessage('A name for the build is required.')
