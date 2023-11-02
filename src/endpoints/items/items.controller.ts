@@ -1,8 +1,9 @@
 import { Router, Response, Request } from 'express';
-import { validationResult } from 'express-validator';
 import * as repository from './items.repository';
 import DatabaseError from '../../utils/errorTypes/database';
 import * as validator from './items.validator';
+
+import expressValidator from '../../middlewares/ExpressValidator';
 
 require('dotenv').config();
 
@@ -86,14 +87,9 @@ const routes = Router();
 routes.get(
   '/',
   validator.searchForItem,
+  expressValidator,
   async (request: Request, response: Response) => {
     const { name } = request.query;
-
-    const errors = validationResult(request);
-
-    if (!errors.isEmpty()) {
-      return response.status(400).json({ errors: errors.array() });
-    }
 
     try {
       const user = await repository.getAllItems(name);

@@ -1,10 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, BeforeInsert } from 'typeorm';
-import { hashPassword } from '../utils/encryption';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import Build from './Build';
 
 @Entity()
 class User {
   @PrimaryGeneratedColumn('uuid')
-  id: number | undefined;
+  id: string | undefined;
 
   @Column()
   role!: number;
@@ -15,11 +15,8 @@ class User {
   @Column()
   password!: string;
 
-  // Hash password before inserting it into the database
-  @BeforeInsert()
-  hashPassword(): void {
-    this.password = hashPassword(this.password as string);
-  }
+  @OneToMany(() => Build, build => build.user)
+  builds!: Build[];
 }
 
 export default User;

@@ -7,7 +7,7 @@ import { DeepPartial } from '../types/deep.partial';
 class Response extends ResponseBase {
   success = (
     response: ResponseExpress,
-    data: string | IDataParams | DeepPartial<unknown>,
+    data: string | IDataParams | DeepPartial<unknown> | any,
   ): void => {
     if (typeof data === 'string') {
       response.status(200).json(data);
@@ -46,6 +46,17 @@ class Response extends ResponseBase {
       response.status(404).json(data);
     } else {
       response.status(404).json(data);
+    }
+  };
+
+  notAllowed = (
+    response: ResponseExpress,
+    data: string | IDataParams | any,
+  ): void => {
+    if (typeof data === 'string') {
+      response.status(401).json(data);
+    } else {
+      response.status(401).json(data);
     }
   };
 

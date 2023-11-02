@@ -39,6 +39,17 @@ export default abstract class ResponseBase {
   abstract successEmpty(response: Response): void;
 
   /**
+   * Sends a status 401 response with a body
+   *
+   * @param { Response } response The response
+   * @param { IDataParams | string | DeepPartial<unknown> | any } data The response data
+   */
+  abstract notAllowed(
+    response: Response,
+    data: IDataParams | string | any,
+  ): void;
+
+  /**
    * Sends a status 500 response with a body
    *
    * @param { Response } response The response

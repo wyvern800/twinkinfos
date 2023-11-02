@@ -1,11 +1,14 @@
 /* eslint-disable consistent-return */
 import { Router, Response, Request } from 'express';
 import jwt from 'jsonwebtoken';
-import { validationResult } from 'express-validator';
 import { verifyPassword } from '../../utils/encryption';
 import * as repository from '../users/users.repository';
 import DatabaseError from '../../utils/errorTypes/database';
 import * as validator from './auth.validator';
+
+import expressValidator from '../../middlewares/ExpressValidator';
+
+import ResponseBase from '../../utils/response';
 
 require('dotenv').config();
 
@@ -89,32 +92,30 @@ const routes = Router();
 routes.post(
   '/login',
   validator.authenticate,
+  expressValidator,
   async (request: Request, response: Response): Promise<unknown> => {
     const { username, password } = request.body;
-
-    const errors = validationResult(request);
-
-    if (!errors.isEmpty()) {
-      return response.status(400).json({ errors: errors.array() });
-    }
 
     try {
       const user = await repository.getUserByUsername(username);
 
       if (user) {
         if (user.role < 2) {
-          response.status(401).json({ error: 'user has no privilleges' });
-        } else if (verifyPassword(password, user.password)) {
+          return ResponseBase.notAllowed(response, {
+            error: 'User has no privilleges',
+          });
+        }
+        if (verifyPassword(password, user.password)) {
           const accessToken = jwt.sign(password, process.env.SECRET_KEY || '');
 
-          response.status(200).json({ accessToken });
+          ResponseBase.success(response, { accessToken });
         } else {
-          response
-            .status(401)
-            .json({ error: 'invalid grand: bad credentials' });
+          ResponseBase.notAllowed(response, {
+            error: 'invalid grand: bad credentials',
+          });
         }
       } else {
-        response.status(400).json({ error: 'user not found' });
+        ResponseBase.notFound(response, { error: 'User not found' });
       }
     } catch (err) {
       throw new DatabaseError('Failed to fetch data from the database.');

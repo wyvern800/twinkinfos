@@ -20,12 +20,24 @@ export const checkDuplicates = async (
 };
 
 /**
+ * Checks if user exists by id
+ *
+ * @param { string } uuid The user id
+ * @returns { boolean } True if user exists in database
+ */
+export const checkUUIDExists = async (uuid: string): Promise<User | null> => {
+  return userRepository.findOne({
+    where: { id: uuid },
+  });
+};
+
+/**
  * Gets the user by id
  *
- * @param { number } id The username
+ * @param { string } id The username
  * @returns { Promise<User> } The user object if existant
  */
-export const getUserById = async (id: number): Promise<User | null> => {
+export const getUserById = async (id: string): Promise<User | null> => {
   return userRepository.findOne({
     where: { id },
   });

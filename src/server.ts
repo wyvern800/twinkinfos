@@ -26,7 +26,9 @@ app.use(errorHandler);
 app.use(cors());
 
 // Initializes the swagger documentation
-new Swagger(app, endPoints).init();
+if (process.env.NODE_ENV !== 'production') {
+  new Swagger(app, endPoints).init();
+}
 
 // Construct all the routes
 endPoints.forEach((route: Controller): void => {
@@ -35,7 +37,7 @@ endPoints.forEach((route: Controller): void => {
 
 // Error handling middleware for 404 Not Found
 app.use((req: Request, res: Response) => {
-  ResponseBase.notFound(res, { error: 'Route not Found' });
+  ResponseBase.notFound(res, { error: 'Route not found' });
 });
 
 // Error handling middleware for other errors
