@@ -1,17 +1,29 @@
-import auth from './auth/auth.controller';
-import users from './users/users.controller';
-import items from './items/items.controller';
-import classes from './classes/classes.controller';
-import builds from './builds/builds.controller';
-
-// Controllers
+/* eslint-disable global-require */
+import * as fs from 'fs';
+import * as path from 'path';
 import { Controller } from '../types/controller';
 
-// Define the routes with its controllers here
-export default [
-  { endpoint: '/auth', controller: auth },
-  { endpoint: '/users', controller: users },
-  { endpoint: '/items', controller: items },
-  { endpoint: '/classes', controller: classes },
-  { endpoint: '/builds', controller: builds },
-] as Controller[];
+const controllers: Controller[] = [];
+
+const endpointFolder = path.join(__dirname);
+
+// Reads the files
+fs.readdirSync(endpointFolder)
+  .filter(file => file !== 'index.ts')
+  .forEach(endpointName => {
+    const controllerPath = path.join(
+      endpointFolder,
+      endpointName,
+      `${endpointName}.controller.ts`,
+    );
+    if (fs.existsSync(controllerPath)) {
+      // eslint-disable-next-line
+      const controller = require(controllerPath).default;
+      controllers.push({
+        endpoint: `/${endpointName}`,
+        controller,
+      });
+    }
+  });
+
+export default controllers;
