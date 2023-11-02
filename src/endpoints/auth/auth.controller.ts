@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 import { Router, Response, Request } from 'express';
 import jwt from 'jsonwebtoken';
 import { validationResult } from 'express-validator';
@@ -88,7 +89,6 @@ const routes = Router();
 routes.post(
   '/login',
   validator.authenticate,
-  // eslint-disable-next-line consistent-return
   async (request: Request, response: Response): Promise<unknown> => {
     const { username, password } = request.body;
 

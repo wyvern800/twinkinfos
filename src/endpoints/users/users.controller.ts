@@ -6,6 +6,8 @@ import JwtWebToken from '../../middlewares/JwtWebToken';
 import * as repository from './users.repository';
 import * as validator from './users.validator';
 
+import BaseResponse from '../../utils/response';
+
 const routes = Router();
 
 /**
@@ -20,7 +22,7 @@ const routes = Router();
  *         description: Successful response with a list of users
  */
 routes.get('/', (request: Request, response: Response) => {
-  return response.json('users');
+  return BaseResponse.successEmpty(response);
 });
 
 /**
@@ -101,9 +103,9 @@ routes.post(
 
     try {
       const createdUser = await repository.insert(user);
-      return response.status(200).json(createdUser);
+      return BaseResponse.success(response, createdUser);
     } catch (error) {
-      return response.status(400).json(error);
+      return BaseResponse.error(response, error);
     }
   },
 );
@@ -143,7 +145,7 @@ routes.get(
       email,
     };
 
-    return response.json(user);
+    return BaseResponse.success(response, user);
   },
 );
 

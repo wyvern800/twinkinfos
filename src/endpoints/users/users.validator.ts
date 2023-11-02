@@ -27,6 +27,5 @@ export const createUser = [
     .exists()
     .withMessage('Password is required.')
     .isLength({ min: 5, max: 10 })
-    .withMessage('Password must be at least 5 and maximum 10 characters long.')
-    .custom(isUsernameUnique),
+    .withMessage('Password must be at least 5 and maximum 10 characters long.'),
 ];
