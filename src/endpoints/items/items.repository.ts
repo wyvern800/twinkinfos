@@ -25,8 +25,8 @@ export const getAllItems = async (itemName: string): Promise<Item[] | null> => {
  * @param { number } itemId The itemId
  * @returns { Promise<Item[]> } The user object if existant
  */
-export const getById = async (itemId: number): Promise<Item[] | null> => {
-  const items = new Database.Items({ iconSrc: 'blizzard' }).filter(
+export const getById = (itemId: number): Item | undefined => {
+  const items = new Database.Items({ iconSrc: 'blizzard' }).find(
     item => item.itemId === itemId,
   );
   return items;
