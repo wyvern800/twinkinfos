@@ -3,12 +3,14 @@ import { Router, Response, Request } from 'express';
 import jwt from 'jsonwebtoken';
 import { verifyPassword } from '../../utils/encryption';
 import * as repository from '../users/users.repository';
-import DatabaseError from '../../utils/errorTypes/database';
+
 import * as validator from './auth.validator';
 
 import expressValidator from '../../middlewares/ExpressValidator';
 
 import ResponseBase from '../../utils/response';
+
+import * as Constants from '../../utils/constants';
 
 require('dotenv').config();
 
@@ -98,11 +100,12 @@ routes.post(
 
     try {
       const user = await repository.getUserByUsername(username);
+      const genericError = 'Password or username are wrong!';
 
       if (user) {
         if (user.role < 2) {
           return ResponseBase.notAllowed(response, {
-            error: 'User has no privilleges',
+            error: 'The user has no privilleges to access this feature.',
           });
         }
         if (verifyPassword(password, user.password)) {
@@ -117,14 +120,16 @@ routes.post(
           ResponseBase.success(response, { accessToken });
         } else {
           ResponseBase.notAllowed(response, {
-            error: 'invalid grand: bad credentials',
+            error: genericError,
           });
         }
       } else {
-        ResponseBase.notFound(response, { error: 'User not found' });
+        ResponseBase.notFound(response, { error: genericError });
       }
     } catch (err) {
-      throw new DatabaseError('Failed to fetch data from the database.');
+      return ResponseBase.internalError(response, {
+        error: 'Something unexpected happened!',
+      });
     }
   },
 );
@@ -202,21 +207,22 @@ routes.post(
         process.env.SECRET_KEY || '',
         async (err: unknown, payload: any) => {
           if (err) {
-            return ResponseBase.notAllowed(response, {
-              error: 'Invalid token.',
+            return ResponseBase.error(response, {
+              error: 'Invalid or expired token.',
             });
           }
           const user = await repository.getUserById(payload.userId);
 
           if (user) {
-            const hasPermission = user.role >= 2;
-            ResponseBase.success(response, { hasPermission });
+            ResponseBase.success(response, {
+              role: Constants.getRole(user.role),
+            });
           }
           return false;
         },
       );
     } catch (err) {
-      ResponseBase.error(response, { error: 'Something unexpected happened' });
+      ResponseBase.internalError(response);
     }
   },
 );
