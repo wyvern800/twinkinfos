@@ -13,7 +13,7 @@ class User {
   @PrimaryGeneratedColumn('uuid')
   id: string | undefined;
 
-  @Column()
+  @Column({ default: 0 })
   role!: number;
 
   @Column({ unique: true })

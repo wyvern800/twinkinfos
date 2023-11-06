@@ -99,7 +99,9 @@ routes.post(
 
     try {
       const createdUser = await repository.insert(user);
-      return BaseResponse.success(response, createdUser);
+      const copyCreated: any = { ...createdUser };
+      delete copyCreated.password;
+      return BaseResponse.success(response, copyCreated);
     } catch (error) {
       return BaseResponse.error(response, error);
     }

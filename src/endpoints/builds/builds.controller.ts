@@ -26,76 +26,99 @@ const routes = Router();
  *       200:
  *         description: Successful response with a list of users
  */
-routes.get('/', async (request: Request, response: Response) => {
-  const allBuilds = await repository.getAllBuilds();
-  const parsedBuilds: any[] = [];
+routes.get(
+  '/',
+  validator.searchByClass,
+  expressValidator,
+  async (request: Request, response: Response) => {
+    const { search } = request.query;
 
-  allBuilds.map(build => {
-    // Map all builds and their object key/vals
-    Object.entries(build).map(([buildKey, buildValue]) => {
+    const allBuilds = await repository.getAllBuilds(search);
+    const parsedBuilds: any[] = [];
+
+    allBuilds.map(build => {
       const newBuildObject: any = { ...build };
 
-      if (buildValue !== null) {
-        let newBuildEquipmentParsed: any = {};
-        // if the build key is within the equipments array, then proceed the parsing
-        if (equipment.includes(buildKey)) {
-          Object.entries(buildValue).map(([k, v]) => {
-            // Convert mainItemId to an actual item
-            if (k === 'mainItemId') {
-              const item = itemsRepository.getById(Number(v));
-              if (item) {
-                // newBuildEquipmentParsed.mainItem = item;
-                newBuildEquipmentParsed = { ...item };
-              }
-            } else if (k === 'alternatives') {
-              const parsedAlternactives: any[] = [];
-              const alternativesOriginal: any = v;
-              alternativesOriginal.map((alt: any) => {
-                let newAlternactive: any = {};
-                // Map the alternactive object
-                Object.entries(alt).map(([altKey, altVal]) => {
-                  if (altKey === 'itemId') {
-                    const item = itemsRepository.getById(Number(altVal));
-                    if (item) {
-                      // newAlternactive.item = item;
-                      newAlternactive = { ...newAlternactive, ...item };
+      // Map all builds and their object key/vals
+      Object.entries(build).map(([buildKey, buildValue]) => {
+        if (buildValue !== null) {
+          const newBuildEquipmentParsed: any = {};
+          // if the build key is within the equipments array, then proceed the parsing
+          if (equipment.includes(buildKey)) {
+            Object.entries(buildValue).map(([k, v]) => {
+              // Convert mainItemId to an actual item
+              if (k === 'hordeMainItemId') {
+                const item = itemsRepository.getById(Number(v));
+                if (item) {
+                  // newBuildEquipmentParsed.mainItem = item;
+                  newBuildEquipmentParsed.hordeItem = item;
+                }
+              } else if (k === 'allianceMainItemId') {
+                const item = itemsRepository.getById(Number(v));
+                if (item) {
+                  // newAlternactive.item = item;
+                  newBuildEquipmentParsed.allianceItem = item;
+                }
+              } else if (k === 'alternatives') {
+                const parsedAlternactives: any[] = [];
+                const alternativesOriginal: any = v;
+                alternativesOriginal.map((alt: any) => {
+                  const newAlternactive: any = {};
+                  // Map the alternactive object
+                  Object.entries(alt).map(([altKey, altVal]) => {
+                    if (altKey === 'hordeItemId') {
+                      const item = itemsRepository.getById(Number(altVal));
+                      if (item) {
+                        // newAlternactive.item = item;
+                        newAlternactive.hordeItem = { ...item, isHorde: true };
+                      }
+                    } else if (altKey === 'allianceItemId') {
+                      const item = itemsRepository.getById(Number(altVal));
+                      if (item) {
+                        // newAlternactive.item = item;
+                        newAlternactive.allianceItem = {
+                          ...item,
+                          isHorde: false,
+                        };
+                      }
+                    } else {
+                      newAlternactive.priority = altVal;
                     }
-                  } else {
-                    newAlternactive.priority = altVal;
-                  }
+
+                    return [altKey, altVal];
+                  });
                   parsedAlternactives.push(newAlternactive);
-                  return [altKey, altVal];
+                  return newAlternactive;
                 });
-                return newAlternactive;
-              });
-              // Map the alternatives
-              newBuildEquipmentParsed.alternatives = parsedAlternactives;
-            }
-            return [k, v];
-          });
+                // Map the alternatives
+                newBuildEquipmentParsed.alternatives = parsedAlternactives;
+              }
+              return [k, v];
+            });
 
-          // delete all old object vals
-          Object.entries(newBuildObject).map(([nBOK, nBOV]) => {
-            if (equipment.includes(nBOK)) {
-              delete newBuildObject[nBOK];
-            }
-            return [nBOK, nBOV];
-          });
+            // delete all old object vals
+            Object.entries(newBuildObject).map(([nBOK, nBOV]) => {
+              if (!equipment.includes(nBOK)) {
+                delete newBuildObject[nBOK];
+              }
+              return [nBOK, nBOV];
+            });
 
-          newBuildObject[buildKey] = newBuildEquipmentParsed;
+            newBuildObject[buildKey] = newBuildEquipmentParsed;
+          }
 
-          parsedBuilds.push(newBuildObject);
+          return newBuildEquipmentParsed;
         }
+        return [buildKey, buildValue];
+      });
 
-        return newBuildEquipmentParsed;
-      }
-      return [buildKey, buildValue];
+      parsedBuilds.push({ ...build, ...newBuildObject });
+      return build;
     });
-    return build;
-  });
 
-  return BaseResponse.success(response, parsedBuilds);
-});
+    return BaseResponse.success(response, parsedBuilds);
+  },
+);
 
 /* routes.get('/builds/view/:buildId', async (request: Request, response) => {
 

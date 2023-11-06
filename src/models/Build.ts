@@ -9,6 +9,8 @@ import {
 import { CharacterClassName } from '../enums/classname';
 import { Item as ItemType } from '../types/others/item';
 import User from './User';
+import { CharacterRaceAlliance, CharacterRaceHorde } from '../enums/race';
+import { Brackets } from '../enums/brackets';
 
 @Entity()
 class Build {
@@ -22,8 +24,33 @@ class Build {
     type: 'enum',
     enum: CharacterClassName,
     nullable: false,
+    default: CharacterClassName.Hunter,
   })
   className!: CharacterClassName;
+
+  @Column({
+    type: 'enum',
+    enum: CharacterRaceHorde,
+    nullable: false,
+    default: CharacterRaceHorde.Orc,
+  })
+  hordeRace!: CharacterRaceHorde;
+
+  @Column({
+    type: 'enum',
+    enum: CharacterRaceAlliance,
+    nullable: false,
+    default: CharacterRaceAlliance.Human,
+  })
+  allianceRace!: CharacterRaceAlliance;
+
+  @Column({
+    type: 'enum',
+    enum: Brackets,
+    nullable: false,
+    default: Brackets.NINETEEN,
+  })
+  bracket!: Brackets;
 
   @Column({ type: 'jsonb', nullable: true, default: null })
   head!: ItemType;
@@ -75,6 +102,9 @@ class Build {
 
   @Column({ type: 'jsonb', nullable: true, default: null })
   relic!: ItemType;
+
+  @Column({ type: 'jsonb', nullable: true, default: null })
+  ranged!: ItemType;
 
   @ManyToOne(() => User, user => user.builds)
   user!: User;

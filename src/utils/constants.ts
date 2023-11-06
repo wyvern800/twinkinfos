@@ -17,6 +17,7 @@ export const equipment = [
   'mainHand',
   'offHand',
   'relic',
+  'ranged',
 ];
 
 /**

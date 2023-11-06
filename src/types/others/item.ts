@@ -1,11 +1,13 @@
 export type AlternativeItem = {
-  itemId: number;
+  hordeItemId: number;
+  allianceItemId: number;
   priority: number;
 };
 
 export type Item =
   | {
-      mainItemId: number;
+      hordeMainItemId: number;
+      allianceMainItemId: number;
       alternatives: AlternativeItem[];
     }
   | undefined;

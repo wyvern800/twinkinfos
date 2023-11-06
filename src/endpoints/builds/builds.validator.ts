@@ -1,9 +1,11 @@
 /* eslint-disable import/prefer-default-export */
-import { body, ValidationChain } from 'express-validator';
+import { body, query, ValidationChain } from 'express-validator';
 import { CharacterClassName } from '../../enums/classname';
 import { Item, AlternativeItem } from '../../types/others/item';
 import { equipment } from '../../utils/constants';
 import * as userRepository from '../users/users.repository';
+import { CharacterRaceAlliance, CharacterRaceHorde } from '../../enums/race';
+import { Brackets } from '../../enums/brackets';
 
 /**
  * Validate if item has the correct structure
@@ -14,14 +16,16 @@ import * as userRepository from '../users/users.repository';
 const validateItem = (value: Item): boolean => {
   if (
     !value ||
-    !('mainItemId' in value) ||
+    !('hordeMainItemId' in value) ||
+    !('allianceMainItemId' in value) ||
     !('alternatives' in value) ||
-    Object.keys(value).length !== 2 ||
+    Object.keys(value).length !== 3 ||
     !Array.isArray(value.alternatives) ||
     !value.alternatives.every(
       (alternative: AlternativeItem) =>
-        Object.keys(alternative).length === 2 &&
-        'itemId' in alternative &&
+        Object.keys(alternative).length === 3 &&
+        'hordeItemId' in alternative &&
+        'allianceItemId' in alternative &&
         'priority' in alternative,
     )
   ) {
@@ -68,6 +72,21 @@ export const createBuild: ValidationChain[] = [
       }
       return true;
     }),
+  body('hordeRace')
+    .exists()
+    .withMessage('A horde race is needed.')
+    .custom((value: CharacterRaceHorde) => value in CharacterRaceHorde)
+    .withMessage(`Invalid race, must be a for example: Undead, Blood Elf...`),
+  body('allianceRace')
+    .exists()
+    .withMessage('An alliance race is needed.')
+    .custom((value: CharacterRaceAlliance) => value in CharacterRaceAlliance)
+    .withMessage(`Invalid race, must be a for example: Gnome, Night Elf...`),
+  body('bracket')
+    .exists()
+    .withMessage('An build bracket is needed.')
+    .custom((value: Brackets) => value in Brackets)
+    .withMessage(`Invalid bracket, must be a for example: 19, 29, 39`),
   // Spread all the validators
   ...equipment.map(equip => {
     return body(equip)
@@ -75,4 +94,13 @@ export const createBuild: ValidationChain[] = [
       .withMessage(`Invalid item structure (${equip}).`)
       .optional();
   }),
+];
+
+export const searchByClass: ValidationChain[] = [
+  query('search')
+    .optional()
+    .custom((value: CharacterClassName) => value in CharacterClassName)
+    .withMessage(
+      `Invalid class name, must be for example: Death Knight, Hunter...`,
+    ),
 ];
