@@ -91,7 +91,9 @@ routes.get(
                   return newAlternactive;
                 });
                 // Map the alternatives
-                newBuildEquipmentParsed.alternatives = parsedAlternactives;
+                newBuildEquipmentParsed.alternatives = parsedAlternactives.sort(
+                  a => a.priority,
+                );
               }
               return [k, v];
             });
