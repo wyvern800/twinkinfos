@@ -63,7 +63,11 @@ AppDataSource.initialize()
     throw new GenericError('Something unexpected happened');
   });
 
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(process.env.APP_PORT, () => {
+    console.log(`Server started to http://localhost:${process.env.APP_PORT}/`);
+  });
+} else {
   // Creating object of key and certificate
   // for SSL
   const options = {
@@ -75,9 +79,5 @@ if (process.env.NODE_ENV === 'production') {
     console.log(
       `Server with ssh started to http://localhost:${process.env.APP_PORT}/`,
     );
-  });
-} else {
-  app.listen(process.env.APP_PORT, () => {
-    console.log(`Server started to http://localhost:${process.env.APP_PORT}/`);
   });
 }
