@@ -4,6 +4,7 @@ import 'reflect-metadata';
 import cors from 'cors';
 import https from 'https';
 import fs from 'fs';
+import path from 'path';
 import AppDataSource from './data-source';
 import { Controller } from './types/controller';
 import endPoints from './endpoints';
@@ -36,6 +37,10 @@ if (process.env.NODE_ENV !== 'production') {
 endPoints.forEach((route: Controller): void => {
   app.use(route.endpoint, route.controller);
 });
+
+// Estático para letsencrypt
+const filesFolderPath = path.join(__dirname, 'files');
+app.use(express.static(filesFolderPath, { dotfiles: 'allow' }));
 
 // Error handling middleware for 404 Not Found
 app.use((req: Request, res: Response) => {

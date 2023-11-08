@@ -5,7 +5,8 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc",
-    "dev:server": "ts-node-dev --inspect --transpileOnly --ignore-watch node_modules src/server.ts"
+    "dev:server": "ts-node-dev --inspect --transpileOnly --ignore-watch node_modules src/server.ts",
+    "letsencrypt": "ts-node-dev --inspect --transpileOnly --ignore-watch node_modules ./letsencrypt/cert.ts"
   },
   "dependencies": {
     "@types/mongodb": "^4.0.7",
