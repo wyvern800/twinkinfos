@@ -2,6 +2,8 @@ import express, { Request, Response } from 'express';
 import morgan from 'morgan';
 import 'reflect-metadata';
 import cors from 'cors';
+import https from 'https';
+import fs from 'fs';
 import AppDataSource from './data-source';
 import { Controller } from './types/controller';
 import endPoints from './endpoints';
@@ -56,6 +58,21 @@ AppDataSource.initialize()
     throw new GenericError('Something unexpected happened');
   });
 
-app.listen(process.env.APP_PORT, () => {
-  console.log(`Server started to http://localhost:${process.env.APP_PORT}/`);
-});
+if (process.env.NODE_ENV === 'production') {
+  // Creating object of key and certificate
+  // for SSL
+  const options = {
+    key: fs.readFileSync('server.key'),
+    cert: fs.readFileSync('server.cert'),
+  };
+
+  https.createServer(options, app).listen(process.env.APP_PORT, () => {
+    console.log(
+      `Server with ssh started to http://localhost:${process.env.APP_PORT}/`,
+    );
+  });
+} else {
+  app.listen(process.env.APP_PORT, () => {
+    console.log(`Server started to http://localhost:${process.env.APP_PORT}/`);
+  });
+}
