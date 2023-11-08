@@ -70,9 +70,13 @@ if (process.env.NODE_ENV !== 'production') {
 } else {
   // Creating object of key and certificate
   // for SSL
+  const privateKey = fs.readFileSync(process.env.PRIVATE_KEY ?? '', 'utf8');
+  const cert = fs.readFileSync(process.env.CERTIFICATE || '', 'utf8');
+  const ca = fs.readFileSync(process.env.CA || '', 'utf8');
   const options = {
-    key: fs.readFileSync('server.key'),
-    cert: fs.readFileSync('server.cert'),
+    key: privateKey,
+    cert,
+    ca,
   };
 
   https.createServer(options, app).listen(process.env.APP_PORT, () => {
