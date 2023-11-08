@@ -8,17 +8,21 @@
     "dev:server": "ts-node-dev --inspect --transpileOnly --ignore-watch node_modules src/server.ts"
   },
   "dependencies": {
+    "@types/mongodb": "^4.0.7",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "dotenv": "^16.3.1",
     "express": "^4.17.1",
+    "express-validator": "^7.0.1",
     "jsonwebtoken": "^9.0.2",
+    "mongodb": "^5.9.1",
     "morgan": "^1.10.0",
     "pg": "^8.11.3",
     "reflect-metadata": "^0.1.13",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.0",
-    "typeorm": "^0.3.16"
+    "typeorm": "^0.3.16",
+    "wow-classic-items": "^2.0.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.15",

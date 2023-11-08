@@ -1,18 +1,42 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import Build from './Build';
 
 @Entity()
 class User {
-  @PrimaryGeneratedColumn()
-  id: number | undefined;
+  @PrimaryGeneratedColumn('uuid')
+  id: string | undefined;
 
-  @Column()
+  @Column({ default: 0 })
   role!: number;
 
-  @Column()
+  @Column({ unique: true })
   username!: string;
 
   @Column()
   password!: string;
+
+  @OneToMany(() => Build, build => build.user)
+  builds!: Build[];
+
+  @CreateDateColumn({
+    type: 'timestamp with time zone',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
+  createdAt!: Date;
+
+  @UpdateDateColumn({
+    type: 'timestamp with time zone',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
+  })
+  updatedAt!: Date;
 }
 
 export default User;

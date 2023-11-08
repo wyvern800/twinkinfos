@@ -1,8 +1,13 @@
 import { Router, Response, Request } from 'express';
 import { DeepPartial } from 'typeorm';
 import User from '../../models/User';
-import JwtWebToken from '../../middlewares/JwtWebToken';
+import jwtWebToken from '../../middlewares/JwtWebToken';
 import * as repository from './users.repository';
+import * as validator from './users.validator';
+
+import BaseResponse from '../../utils/response';
+
+import expressValidator from '../../middlewares/ExpressValidator';
 
 const routes = Router();
 
@@ -18,7 +23,7 @@ const routes = Router();
  *         description: Successful response with a list of users
  */
 routes.get('/', (request: Request, response: Response) => {
-  return response.json('users');
+  return BaseResponse.successEmpty(response);
 });
 
 /**
@@ -81,6 +86,8 @@ routes.get('/', (request: Request, response: Response) => {
  */
 routes.post(
   '/',
+  validator.createUser,
+  expressValidator,
   async (request: Request, response: Response): Promise<unknown> => {
     const { username, password } = request.body;
 
@@ -92,9 +99,11 @@ routes.post(
 
     try {
       const createdUser = await repository.insert(user);
-      return response.status(200).json(createdUser);
+      const copyCreated: any = { ...createdUser };
+      delete copyCreated.password;
+      return BaseResponse.success(response, copyCreated);
     } catch (error) {
-      return response.status(400).json(error);
+      return BaseResponse.error(response, error);
     }
   },
 );
@@ -125,7 +134,7 @@ routes.post(
  */
 routes.get(
   '/test-auth',
-  JwtWebToken,
+  jwtWebToken,
   (request: Request, response: Response) => {
     const { name, email } = request.body;
 
@@ -134,7 +143,7 @@ routes.get(
       email,
     };
 
-    return response.json(user);
+    return BaseResponse.success(response, user);
   },
 );
 

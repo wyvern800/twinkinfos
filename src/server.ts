@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import morgan from 'morgan';
 import 'reflect-metadata';
 import cors from 'cors';
@@ -8,10 +8,11 @@ import endPoints from './endpoints';
 import GenericError from './utils/errorTypes/generic';
 import errorHandler from './middlewares/ErrorHandler';
 import Swagger from './utils/swagger';
+import ResponseBase from './utils/response';
+
+require('dotenv').config();
 
 const app = express();
-
-const PORT = 3333;
 
 app.use(express.json());
 
@@ -25,11 +26,23 @@ app.use(errorHandler);
 app.use(cors());
 
 // Initializes the swagger documentation
-new Swagger(app, endPoints).init();
+if (process.env.NODE_ENV !== 'production') {
+  new Swagger(app, endPoints).init();
+}
 
 // Construct all the routes
-endPoints.forEach((endPoint: Controller): void => {
-  app.use(endPoint.endpoint, endPoint.controller);
+endPoints.forEach((route: Controller): void => {
+  app.use(route.endpoint, route.controller);
+});
+
+// Error handling middleware for 404 Not Found
+app.use((req: Request, res: Response) => {
+  ResponseBase.notFound(res, { error: 'Route not found' });
+});
+
+// Error handling middleware for other errors
+app.use((err: Error, req: Request, res: Response) => {
+  ResponseBase.internalError(res, { error: 'Internal server error' });
 });
 
 // to initialize initial connection with the database, register all entities
@@ -43,6 +56,6 @@ AppDataSource.initialize()
     throw new GenericError('Something unexpected happened');
   });
 
-app.listen(PORT, () => {
-  console.log(`Server started on port ${PORT}`);
+app.listen(process.env.APP_PORT, () => {
+  console.log(`Server started to http://localhost:${process.env.APP_PORT}/`);
 });
