@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 import { Router, Response, Request } from 'express';
 import { DeepPartial } from 'typeorm';
 import Build from '../../models/Build';
@@ -12,6 +13,7 @@ import expressValidator from '../../middlewares/ExpressValidator';
 import * as itemsRepository from '../items/items.repository';
 
 import { equipment } from '../../utils/constants';
+import * as buildParser from './build.parser';
 
 const routes = Router();
 
@@ -30,117 +32,100 @@ routes.get(
   '/',
   validator.searchByClass,
   expressValidator,
-  async (request: Request, response: Response) => {
+  async (request: Request, response: Response): Promise<any> => {
     const { search } = request.query;
+    let resp: any;
+    try {
+      const builds = await repository.getAllBuilds(search);
 
-    const allBuilds = await repository.getAllBuilds(search);
-    const parsedBuilds: any[] = [];
+      const parsedBuilds = await Promise.all(
+        builds.map(
+          async (build: any): Promise<any> => {
+            if (build) {
+              const result = await repository.getByIdMongo({
+                buildId: build.id,
+              });
 
-    allBuilds.map(build => {
-      const newBuildObject: any = { ...build };
-
-      // Map all builds and their object key/vals
-      Object.entries(build).map(([buildKey, buildValue]) => {
-        if (buildValue !== null) {
-          const newBuildEquipmentParsed: any = {};
-          // if the build key is within the equipments array, then proceed the parsing
-          if (equipment.includes(buildKey)) {
-            Object.entries(buildValue).map(([k, v]) => {
-              // Convert mainItemId to an actual item
-              if (k === 'hordeMainItemId') {
-                const item = itemsRepository.getById(Number(v));
-                if (item) {
-                  // newBuildEquipmentParsed.mainItem = item;
-                  newBuildEquipmentParsed.hordeItem = item;
-                }
-              } else if (k === 'allianceMainItemId') {
-                const item = itemsRepository.getById(Number(v));
-                if (item) {
-                  // newAlternactive.item = item;
-                  newBuildEquipmentParsed.allianceItem = item;
-                }
-              } else if (k === 'alternatives') {
-                const parsedAlternactives: any[] = [];
-                const alternativesOriginal: any = v;
-                alternativesOriginal.map((alt: any) => {
-                  const newAlternactive: any = {};
-                  // Map the alternactive object
-                  Object.entries(alt).map(([altKey, altVal]) => {
-                    if (altKey === 'hordeItemId') {
-                      const item = itemsRepository.getById(Number(altVal));
-                      if (item) {
-                        // newAlternactive.item = item;
-                        newAlternactive.hordeItem = { ...item, isHorde: true };
-                      }
-                    } else if (altKey === 'allianceItemId') {
-                      const item = itemsRepository.getById(Number(altVal));
-                      if (item) {
-                        // newAlternactive.item = item;
-                        newAlternactive.allianceItem = {
-                          ...item,
-                          isHorde: false,
-                        };
-                      }
-                    } else {
-                      newAlternactive.priority = altVal;
-                    }
-
-                    return [altKey, altVal];
-                  });
-                  parsedAlternactives.push(newAlternactive);
-                  return newAlternactive;
-                });
-                // Map the alternatives
-                newBuildEquipmentParsed.alternatives = parsedAlternactives.sort(
-                  a => a.priority,
-                );
+              if (result) {
+                const parsedBuild = { ...build, ...result };
+                return parsedBuild;
               }
-              return [k, v];
-            });
-
-            // delete all old object vals
-            Object.entries(newBuildObject).map(([nBOK, nBOV]) => {
-              if (!equipment.includes(nBOK)) {
-                delete newBuildObject[nBOK];
-              }
-              return [nBOK, nBOV];
-            });
-
-            newBuildObject[buildKey] = newBuildEquipmentParsed;
-          }
-
-          return newBuildEquipmentParsed;
-        }
-        return [buildKey, buildValue];
-      });
-
-      parsedBuilds.push({ ...build, ...newBuildObject });
-      return build;
-    });
-
-    return BaseResponse.success(response, parsedBuilds);
+            }
+            return build;
+          },
+        ),
+      );
+      resp = BaseResponse.success(response, parsedBuilds);
+    } catch (err) {
+      resp = BaseResponse.internalError(response, { error: "Didn't work" });
+    }
+    return resp;
   },
 );
 
-/* routes.get('/builds/view/:buildId', async (request: Request, response) => {
-
-}); */
-
-// TODO:
 routes.post(
   '/',
   validator.createBuild,
   expressValidator,
   jwtWebToken,
-  async (request: Request, response: Response): Promise<unknown> => {
-    const user: DeepPartial<Build> = { ...request.body };
+  async (request: Request, response: Response): Promise<any> => {
+    let responseToFront: any | undefined;
+    const {
+      alias,
+      className,
+      user,
+      hordeRace,
+      allianceRace,
+      bracket,
+    } = request.body;
 
     try {
-      const createdBuild = await repository.insert(user);
-      return BaseResponse.success(response, createdBuild);
+      const postgresBuild: DeepPartial<Build> = {
+        alias,
+        className,
+        user,
+        hordeRace,
+        allianceRace,
+        bracket,
+      };
+
+      const createdBuild = await repository.insert(postgresBuild);
+
+      const mongoBuild = { buildId: createdBuild.id, ...request.body };
+
+      // Delete the keys that arent part of the equipment
+      Object.keys(mongoBuild).map((key: any): void => {
+        if (!equipment.includes(key) && key !== 'buildId') {
+          delete mongoBuild[key];
+        }
+        return key;
+      });
+
+      const newBuildObject: any = buildParser.parseBuild(
+        request.body,
+        itemsRepository,
+      );
+
+      const result = await repository.insertMongo({
+        ...newBuildObject,
+        buildId: createdBuild.id,
+      });
+
+      if (result) {
+        const toFront = {
+          ...createdBuild,
+          ...mongoBuild,
+          mongoBuildId: mongoBuild.id,
+        };
+
+        delete toFront._id;
+
+        responseToFront = BaseResponse.success(response, toFront);
+      }
     } catch (error) {
-      return BaseResponse.error(response, error);
+      responseToFront = BaseResponse.error(response, error);
     }
+    return responseToFront;
   },
 );
 

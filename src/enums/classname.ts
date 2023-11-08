@@ -11,3 +11,16 @@ export enum CharacterClassName {
   'Warlock' = 'Warlock',
   'Warrior' = 'Warrior',
 }
+
+export enum CharacterClassNameNormal {
+  'death knight' = 'death knight',
+  'druid' = 'druid',
+  'hunter' = 'hunter',
+  'mage' = 'mage',
+  'paladin' = 'paladin',
+  'priest' = 'priest',
+  'rogue' = 'rogue',
+  'shaman' = 'shaman',
+  'warlock' = 'warlock',
+  'warrior' = 'warrior',
+}
