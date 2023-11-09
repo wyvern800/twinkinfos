@@ -21,7 +21,7 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > ssh_key
           chmod 600 ssh_key
           eval "$(ssh-agent -s)"
-          ssh-add ssh_key
+          ssh-add ~/.ssh/id_rsa
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
@@ -36,6 +36,6 @@ jobs:
           echo "Starting deployment..."
           scp -r ./* root@api.wowtwinks.info:api/twinkinfos
           ssh root@api.wowtwinks.info 'cd api/twinkinfos && npm install && pm2 restart twinkinfos'
-          cho "Deployment completed."
+          echo "Deployment completed."
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
