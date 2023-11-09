@@ -24,11 +24,11 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Add server key to known_hosts
-        run: ssh-keyscan api.wowtwinks.info >> ~/.ssh/known_hosts
+        run: ssh-keyscan 158.69.28.205 >> ~/.ssh/known_hosts
 
       - name: Deploy to VPS
         run: |
           echo "Starting deployment..."
-          scp -r ./* root@api.wowtwinks.info:api/twinkinfos
-          ssh root@api.wowtwinks.info 'cd api/twinkinfos && npm install && pm2 restart twinkinfos'
+          scp -r ./* root@158.69.28.205:api/twinkinfos
+          ssh root@158.69.28.205 'cd api/twinkinfos && npm install && pm2 restart twinkinfos'
           echo "Deployment completed."
