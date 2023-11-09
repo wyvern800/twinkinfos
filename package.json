@@ -8,7 +8,7 @@
     "dev:server": "ts-node-dev --poll --transpileOnly --ignore-watch node_modules src/server.ts",
     "prod:server": "./scripts/start.sh",
     "prod:server:restart": "./scripts/start.sh",
-    "prod:server:stop": "pkill -f '/root/api/twinkinfos/node_modules/.bin/ts-node-dev --poll --transpileOnly --ignore-watch node_modules src/server.ts'",
+    "prod:server:stop": "pkill -f 'node'",
     "letsencrypt": "ts-node-dev --poll --transpileOnly --ignore-watch node_modules ./letsencrypt/cert.ts"
   },
   "dependencies": {
