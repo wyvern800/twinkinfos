@@ -13,13 +13,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Create SSH directory
-        run: mkdir -p ~/.ssh  
-
       - name: Configure SSH Key
         run: |
-          echo "$SSH_PRIVATE_KEY" > ssh_key
-          chmod 600 ssh_key
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > id_rsa
+          chmod 600 ~/.ssh/id_rsa
           eval "$(ssh-agent -s)"
           ssh-add ~/.ssh/id_rsa
         env:
