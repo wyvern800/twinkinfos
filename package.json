@@ -7,7 +7,8 @@
     "build": "tsc",
     "dev:server": "nohup ts-node-dev --poll --transpileOnly --ignore-watch node_modules src/server.ts",
     "prod:server": "ts-node-dev --poll --transpileOnly --ignore-watch node_modules nohup src/server.ts &",
-    "restart": "./restart.sh",
+    "prod:server:restart": "./restart.sh",
+    "prod:server:stop": "pkill -f 'ts-node-dev --poll --transpileOnly --ignore-watch node_modules nohup src/server.ts'",
     "letsencrypt": "ts-node-dev --poll --transpileOnly --ignore-watch node_modules ./letsencrypt/cert.ts"
   },
   "dependencies": {
