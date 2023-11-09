@@ -13,21 +13,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Configure SSH Key
+      - name: Create SSH directory and add private key
         run: |
           mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > id_rsa
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           eval "$(ssh-agent -s)"
           ssh-add ~/.ssh/id_rsa
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Install dependencies
-        run: npm install --legacy-peer-deps
-
       - name: Add server key to known_hosts
-        run: ssh-keyscan api.wowtwinks.info >> ~/.ssh/known_hosts  
+        run: ssh-keyscan api.wowtwinks.info >> ~/.ssh/known_hosts
 
       - name: Deploy to VPS
         run: |
@@ -35,5 +32,3 @@ jobs:
           scp -r ./* root@api.wowtwinks.info:api/twinkinfos
           ssh root@api.wowtwinks.info 'cd api/twinkinfos && npm install && pm2 restart twinkinfos'
           echo "Deployment completed."
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
