@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Find and kill the running process
-pkill -f "pkill -f 'node'"
+pkill -f "pkill -f 'ts-node-dev'"
 
 # Wait for a few seconds to allow the process to terminate properly
 sleep 5
