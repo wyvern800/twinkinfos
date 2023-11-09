@@ -79,9 +79,10 @@ if (process.env.ENV !== 'production') {
     ca,
   };
 
-  https.createServer(options, app).listen(process.env.APP_PORT, () => {
-    console.log(
-      `Server with ssh started to http://localhost:${process.env.APP_PORT}/`,
-    );
+  /**
+   * The port must be 443
+   */
+  https.createServer(options, app).listen(443, () => {
+    console.log(`Server with ssh started to port 443`);
   });
 }
