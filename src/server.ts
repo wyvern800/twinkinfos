@@ -63,7 +63,7 @@ AppDataSource.initialize()
     throw new GenericError('Something unexpected happened');
   });
 
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.ENV !== 'production') {
   app.listen(process.env.APP_PORT, () => {
     console.log(`Server started to http://localhost:${process.env.APP_PORT}/`);
   });
