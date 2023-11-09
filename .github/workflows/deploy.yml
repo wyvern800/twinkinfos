@@ -27,7 +27,7 @@ jobs:
 
       - name: Deploy to VPS
         run: |
-          scp -r ./* root@api.wowtwinks.info:/api/twinkinfos
+          scp -r ./* root@api.wowtwinks.info:api/twinkinfos
           ssh root@api.wowtwinks.info 'cd api/twinkinfos && npm install --legacy-peer-deps && pm2 restart twinkinfos'
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
