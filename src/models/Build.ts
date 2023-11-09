@@ -52,7 +52,7 @@ class Build {
   })
   bracket!: Brackets;
 
-  @Column({ type: 'jsonb', nullable: true, default: null })
+  /* @Column({ type: 'jsonb', nullable: true, default: null })
   head!: ItemType;
 
   @Column({ type: 'jsonb', nullable: true, default: null })
@@ -104,7 +104,7 @@ class Build {
   relic!: ItemType;
 
   @Column({ type: 'jsonb', nullable: true, default: null })
-  ranged!: ItemType;
+  ranged!: ItemType; */
 
   @ManyToOne(() => User, user => user.builds)
   user!: User;
