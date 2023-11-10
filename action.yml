@@ -1,0 +1,27 @@
+name: 'Custom Deployment Action'
+description: 'Deploy your application using custom deployment script'
+
+inputs:
+  host:
+    description: 'SSH Host for deployment'
+    required: true
+  username:
+    description: 'SSH Username'
+    required: true
+  private_key:
+    description: 'SSH Private Key for authentication'
+    required: true
+  port:
+    description: 'SSH Port'
+    required: true
+    default: 22
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Deploy using SSH
+      run: |
+        ssh -i "${{ inputs.private_key }}" -p "${{ inputs.port }}" "${{ inputs.username }}@${{ inputs.host }}"
