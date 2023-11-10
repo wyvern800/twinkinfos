@@ -17,7 +17,7 @@ inputs:
     default: 22
 
 runs:
-  using: 'composite'
+  using: 'shell'
   shell: bash
   steps:
     - name: Checkout repository
