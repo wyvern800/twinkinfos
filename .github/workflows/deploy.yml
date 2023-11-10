@@ -23,10 +23,12 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Add server key to known_hosts
+      - name: Add server key to known_hosts and authorized_keys
         run: |
           ssh-keyscan 158.69.28.205 >> ~/.ssh/known_hosts
-          ssh-keyscan 158.69.28.205 >> ~/.ssh/authorized_keys
+          echo "$(cat ~/.ssh/id_rsa.pub)" >> ~/.ssh/authorized_keys
+          # Ensure correct permissions for the SSH directory and files
+          - run: chmod 700 ~/.ssh && chmod 600 ~/.ssh/*
 
       - name: Deploy to VPS
         run: |
