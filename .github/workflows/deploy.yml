@@ -13,22 +13,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Create SSH directory and add private key
-        run: |
-          mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          eval "$(ssh-agent -s)"
-          ssh-add ~/.ssh/id_rsa
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: Add server key to known_hosts
-        run: ssh-keyscan 158.69.28.205 >> ~/.ssh/known_hosts
+      - name: Install SSH key
+        run: echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
 
       - name: Deploy to VPS
         run: |
-          echo "Starting deployment..."
-          scp -r ./* root@158.69.28.205:api/twinkinfos
-          ssh -v root@158.69.28.205 'cd api/twinkinfos && npm install && pm2 restart twinkinfos'
-          echo "Deployment completed."
+          scp -r ./* root@158.69.28.205:/api/twinkinfos
+          ssh root@158.69.28.205 'cd /api/twinkinfos && npm install --legacy-peer-deps && pm2 restart twinkinfos'
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
