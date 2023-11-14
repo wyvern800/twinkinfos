@@ -7,7 +7,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { CharacterClassName } from '../enums/classname';
-import { Item as ItemType } from '../types/others/item';
 import User from './User';
 import { CharacterRaceAlliance, CharacterRaceHorde } from '../enums/race';
 import { Brackets } from '../enums/brackets';
@@ -19,6 +18,9 @@ class Build {
 
   @Column({ nullable: false })
   alias!: string;
+
+  @Column({ nullable: true })
+  notes!: string;
 
   @Column({
     type: 'enum',

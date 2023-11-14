@@ -19,13 +19,13 @@ const validateItem = (value: Item): boolean => {
     !('hordeMainItemId' in value) ||
     !('allianceMainItemId' in value) ||
     !('alternatives' in value) ||
-    Object.keys(value).length !== 3 ||
+    Object.keys(value).length < 3 ||
     !Array.isArray(value.alternatives) ||
     !value.alternatives.every(
       (alternative: AlternativeItem) =>
-        Object.keys(alternative).length === 3 &&
-        'hordeItemId' in alternative &&
-        'allianceItemId' in alternative &&
+        Object.keys(alternative).length >= 3 &&
+        'itemId' in alternative &&
+        'type' in alternative &&
         'priority' in alternative,
     )
   ) {
@@ -44,6 +44,12 @@ export const createBuild: ValidationChain[] = [
     .isLength({ min: 5, max: 20 })
     .withMessage(
       'Build name must have at least 5 and maximum 20 characters long.',
+    ),
+  body('notes')
+    .optional()
+    .isLength({ max: 1000 })
+    .withMessage(
+      'Notes must have at least 5 and maximum 1000 characters long.',
     ),
   body('className')
     .custom(value => {
