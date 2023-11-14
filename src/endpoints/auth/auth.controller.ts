@@ -109,12 +109,13 @@ routes.post(
           });
         }
         if (verifyPassword(password, user.password)) {
-          const accessToken = jwt.sign(
+          const options = {
+            expiresIn: process.env.ENV !== 'production' ? '24h' : '1h',
+          };
+          const accessToken: any = jwt.sign(
             { userId: user.id },
             process.env.SECRET_KEY || '',
-            {
-              expiresIn: '1h',
-            },
+            options,
           );
 
           ResponseBase.success(response, { accessToken });
